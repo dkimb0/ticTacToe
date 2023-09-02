@@ -1,16 +1,11 @@
 //Gameboard module object:
-//  -holds array
-//      -pre-populate with 9 empty characters
-//      -array items 1-3 top row, 4-6 middle, 7-9 bottom
-//      -
 
 //displayController module obj
-//  -function to generate the new gameboard on the screen
-//      -show 11, 12, 13 etc for row column designation
 
 //player factory object:
-//  -creates player
-
+const personFactory = (name) => {
+    return {name};
+}
 //game flow control object:
 //
 
@@ -19,16 +14,27 @@
 
 //initialize
 let gameBoard = new Array(' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+const gameStatus = {
+    currentPlayer: 1,
+    winState: false,
+    tieState: false,
+}
+
+//player creation
+function createPlayer(name){
+    return {name};
+}
+
 let player = 1;
 
 //display
-function updateBoard(){
-    for (i = 0; i < 9; i++){
+function updateBoard(gameBoard){
+    for (let i = 0; i < 9; i++){
         document.getElementById(`${i+1}`).textContent = gameBoard[i];
     }
 }
 
-updateBoard();
+updateBoard(gameBoard);
 
 
 //make a move
@@ -50,15 +56,70 @@ function makeMove(player, gameBoard, event){
 for (i = 0; i < 9; i++){
     document.querySelectorAll('.box')[i].addEventListener('click', function (event){
         player = makeMove(player, gameBoard, event);
-        updateBoard();
+        updateBoard(gameBoard);
     });
 }
 
+//check if game over
+// function winCheck(gameBoard){
+    
+// }
 
 
+function checkRow(gameBoard){
+    for(let i = 0; i < 9; i+=3){
+        if (gameBoard[i] === gameBoard[i+1] &&
+            gameBoard[i] === gameBoard[i+2] &&
+            gameBoard[i] !== ' '){
+            console.log('row three in a row, ' + gameBoard[i]);
+            return gameBoard[i];
+        }
+    }
+    return false;
+}
 
+function checkCol(gameBoard){
+    for (let i=0; i<3; i++){
+        if (gameBoard[i] === gameBoard[i+3] &&
+            gameBoard[i] === gameBoard[i+6] &&
+            gameBoard[i] !== ' '){
+            console.log('column three in a row, ' + gameBoard[i]);
+            return gameboard[i];
+        }
+    }
+    return false;
+}
 
+function checkDiag(gameBoard){
+    if (gameBoard[0] === gameBoard[4] &&
+        gameBoard[0] === gameBoard[8] &&
+        gameBoard[0] !== ' '){
+        console.log('diagonal three in a row, ' + gameBoard[0]);
+        return gameBoard[0];
+    }else if
+        (gameBoard[2] === gameBoard[4] &&
+         gameBoard[2] === gameBoard[6] &&
+         gameBoard[2] !== ' '){
+         console.log('diagonal three in a row, ' + gameBoard[2]);
+         return gameBoard[2];
+    }else{
+        return false;
+    }
+}
 
+function checkOpenMoves(gameBoard){
+    return gameBoard.filter(value => value.includes(' ')).length;
+}
+
+function checkTie(gameBoard){
+    if (checkOpenMoves(gameBoard) === 0 &&
+        !checkDiag(gameBoard) &&
+        !checkRow(gameBoard) &&
+        !checkCol(gameBoard)){
+            console.log('tie!');
+        }
+
+}
 
 
 

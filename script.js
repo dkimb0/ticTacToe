@@ -14,56 +14,65 @@ const personFactory = (name) => {
 
 //initialize
 let gameBoard = new Array(' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-const gameStatus = {
-    currentPlayer: 1,
-    winState: false,
-    tieState: false,
-}
+let counter = 1;
 
-//player creation
-function createPlayer(name){
-    return {name};
-}
 
-let player = 1;
+
 
 //display
-function updateBoard(gameBoard){
+function updateDisplay(gameBoard){
     for (let i = 0; i < 9; i++){
         document.getElementById(`${i+1}`).textContent = gameBoard[i];
     }
 }
 
-updateBoard(gameBoard);
+updateDisplay(gameBoard);
 
 
 //make a move
 //also changes gameBoard
-function makeMove(player, gameBoard, event){
-    if (player === 1  && gameBoard[event.target.id - 1] === ' '){
+function makeMove(counter, gameBoard, event){
+    
+    checkMove(gameBoard, event.target.id-1)
+    if (counter%2 === 1  && checkMove(gameBoard, event.target.id-1)){
         gameBoard[event.target.id - 1] = 'x';
-        player = 2;
-    }else if (player === 2 && gameBoard[event.target.id - 1] === ' '){
+    }else if (counter%2 === 0 && checkMove(gameBoard, event.target.id-1)){
         gameBoard[event.target.id - 1] = 'o';
-        player = 1;
-    }else{
-        alert('Pick an empty box');
     }
-    return player;
+
+    winCheck(gameBoard);
+    counter++;
+
+    return counter;
 }
+
+function checkMove(gameBoard, cell){
+    if (gameBoard[cell] === ' '){
+        return true;
+    }
+}
+
 
 //click initialize
 for (i = 0; i < 9; i++){
     document.querySelectorAll('.box')[i].addEventListener('click', function (event){
-        player = makeMove(player, gameBoard, event);
-        updateBoard(gameBoard);
+        counter = makeMove(counter, gameBoard, event);
+        updateDisplay(gameBoard);
     });
 }
 
 //check if game over
-// function winCheck(gameBoard){
-    
-// }
+function winCheck(gameBoard){
+    if (checkRow(gameBoard) || checkCol(gameBoard) || checkDiag(gameBoard)){
+        if (counter%2 === 1){
+            console.log('x won');
+        }else{
+            console.log('o won');
+        }
+    }else if (checkOpenMoves(gameBoard) === 0){
+        console.log('tie');
+    }
+}
 
 
 function checkRow(gameBoard){
@@ -71,8 +80,8 @@ function checkRow(gameBoard){
         if (gameBoard[i] === gameBoard[i+1] &&
             gameBoard[i] === gameBoard[i+2] &&
             gameBoard[i] !== ' '){
-            console.log('row three in a row, ' + gameBoard[i]);
-            return gameBoard[i];
+
+            return true;
         }
     }
     return false;
@@ -83,8 +92,8 @@ function checkCol(gameBoard){
         if (gameBoard[i] === gameBoard[i+3] &&
             gameBoard[i] === gameBoard[i+6] &&
             gameBoard[i] !== ' '){
-            console.log('column three in a row, ' + gameBoard[i]);
-            return gameboard[i];
+
+            return true;
         }
     }
     return false;
@@ -94,14 +103,14 @@ function checkDiag(gameBoard){
     if (gameBoard[0] === gameBoard[4] &&
         gameBoard[0] === gameBoard[8] &&
         gameBoard[0] !== ' '){
-        console.log('diagonal three in a row, ' + gameBoard[0]);
-        return gameBoard[0];
+
+        return true;
     }else if
         (gameBoard[2] === gameBoard[4] &&
          gameBoard[2] === gameBoard[6] &&
          gameBoard[2] !== ' '){
-         console.log('diagonal three in a row, ' + gameBoard[2]);
-         return gameBoard[2];
+
+         return true;
     }else{
         return false;
     }
@@ -109,16 +118,6 @@ function checkDiag(gameBoard){
 
 function checkOpenMoves(gameBoard){
     return gameBoard.filter(value => value.includes(' ')).length;
-}
-
-function checkTie(gameBoard){
-    if (checkOpenMoves(gameBoard) === 0 &&
-        !checkDiag(gameBoard) &&
-        !checkRow(gameBoard) &&
-        !checkCol(gameBoard)){
-            console.log('tie!');
-        }
-
 }
 
 

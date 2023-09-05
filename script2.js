@@ -2,13 +2,13 @@ const Player = () => {
     'use strict'
     let player = {};
 
-    const _setName = () => {
-        let name = prompt(`What is your name?`);
+    const _setName = (playerCount) => {
+        let name = prompt(`Player ${playerCount}, what is your name?`);
         player.name = name;
     }
 
-    const initName = () => {
-        _setName();
+    const initName = (playerCount) => {
+        _setName(playerCount);
         _displayName();
     }
 
@@ -31,23 +31,27 @@ const GameBoard = (() => {
 
     let board = [];
     let counter;
-    let botFlag = false;
-    let botCell;
+    // let botFlag = false;
+    // let botCell;
+    let playerCount;
     const player1 = Player();
     const player2 = Player();
 
 
     const init = () => {
         //initialize new game/players buttons
-        document.querySelector('.newGame').addEventListener('click', function (){
-            _newGame();
-        })
-        document.querySelector('.newPlayers').addEventListener('click', function (){
+        let restart = document.querySelector('.restart');
+
+         document.querySelector('.newPlayers').addEventListener('click', function (){
             _newPlayers();
         })
-        document.querySelector('.newBotGame').addEventListener('click', function (){
-            _newBotGame();
+        restart.addEventListener('click', function (){
+            _newGame();
         })
+
+        // document.querySelector('.newBotGame').addEventListener('click', function (){
+        //     _newBotGame();
+        // })
 
         _initDivs();
 
@@ -59,13 +63,13 @@ const GameBoard = (() => {
             document.querySelectorAll('.box')[i].addEventListener('click', function (event){
                 _makeMove(event);
                 displayController.updateDisplay();
-                if (botFlag === true){
-                    _botMove();
-                    setTimeout(() => {
-                        displayController.updateDisplay();
-                    }, "1000");
-                    ;
-                }
+                // if (botFlag === true){
+                //     _botMove();
+                //     setTimeout(() => {
+                //         displayController.updateDisplay();
+                //     }, "1000");
+                //     ;
+                // }
 
             })
         }
@@ -82,37 +86,38 @@ const GameBoard = (() => {
         _clearWinMessage();
     }
 
-    const _newBotGame = () => {
-        _newGame();
-        _newPlayerBot();
-        botFlag = true;
-        //add bot specific things to initialize
-    }
+    // const _newBotGame = () => {
+    //     _newGame();
+    //     _newPlayerBot();
+    //     botFlag = true;
+    //     //add bot specific things to initialize
+    // }
 
     const _newPlayers = () => {
         _clearPlayerMessage();
-        player1.initName();
+        player1.initName(1);
         document.getElementById(`p1`).textContent += ' vs ';   
-        player2.initName();
+        player2.initName(2);
+        _newGame();
     }
 
-    const _newPlayerBot = () => {
-        _clearPlayerMessage();
-        player1.initName();
-        document.getElementById(`p1`).textContent += ' vs Bot';  
-    }
+    // const _newPlayerBot = () => {
+    //     _clearPlayerMessage();
+    //     player1.initName();
+    //     document.getElementById(`p1`).textContent += ' vs Bot';  
+    // }
 
-    const _botMove = () => {
-        botCell = Math.floor(Math.random()*9);
+    // const _botMove = () => {
+    //     botCell = Math.floor(Math.random()*9);
         
-        if (_checkMove(botCell)){
-            board[botCell] = 'o';
-            ++counter;
-            _winCheck();
-        }else{
-            _botMove();
-        }
-    }
+    //     if (_checkMove(botCell)){
+    //         board[botCell] = 'o';
+    //         ++counter;
+    //         _winCheck();
+    //     }else{
+    //         _botMove();
+    //     }
+    // }
 
     const _clearPlayerMessage = () => {
         document.getElementById('p1').textContent = '';
@@ -134,6 +139,8 @@ const GameBoard = (() => {
     const _checkMove = (cell) => {
         if (board[cell] === ' '){
             return true;
+        }else{
+            return false;
         }
     }
 
@@ -142,15 +149,29 @@ const GameBoard = (() => {
         if (_winCheck()){
             return;
         }else{
-            ++counter;
-            if (counter%2 === 1 && _checkMove(event.target.id - 1)){
-                board[event.target.id - 1] = 'x';
-    
-            }else if(counter%2 === 0 && _checkMove(event.target.id - 1)){
-                board[event.target.id - 1] = 'o';
+            if (_checkMove(event.target.id - 1)){
+                ++counter;                
+                if (counter%2 === 1){
+                    board[event.target.id - 1] = 'x';
+                    document.getElementById(event.target.id).style.color = 'var(--blue)';
+                }else{
+                    board[event.target.id - 1] = 'o';
+                    document.getElementById(event.target.id).style.color = 'var(--red)';
+                }
+
+                _winCheck();
             }
+            
+
+
+            // if (counter%2 === 1 && _checkMove(event.target.id - 1)){
+            //     board[event.target.id - 1] = 'x';
     
-            _winCheck();
+            // }else if(counter%2 === 0 && _checkMove(event.target.id - 1)){
+            //     board[event.target.id - 1] = 'o';
+            // }
+    
+            // _winCheck();
             
         }
         
@@ -158,14 +179,19 @@ const GameBoard = (() => {
 
     //if no open moves and no win condition, then its a tie
     const _winCheck = () => {
+        if (player1.getName() === undefined){
+            return;
+        }
+        
         if (_checkRow() || _checkCol() || _checkDiag()){
             if (counter%2 === 1){
                 document.getElementById('message').textContent = player1.getName() + ' wins';
-            }else if(counter%2 === 0){
-                document.getElementById('message').textContent = player2.getName() + ' wins';
             }else{
-                document.getElementById('message').textContent = 'Bot wins';
+                document.getElementById('message').textContent = player2.getName() + ' wins';
             }
+            // else{
+            //     document.getElementById('message').textContent = 'Bot wins';
+            // }
             return true;
         }else if (_checkOpenMoves() === 0){
             document.getElementById('message').textContent = 'tie';
@@ -246,3 +272,4 @@ GameBoard.init();
 //fix boot to wait for new game/players instead of auto loading players
 //fix message for new player, reference player 1 or 2?
 //fix win message if bot wins
+//

@@ -31,6 +31,8 @@ const GameBoard = (() => {
 
     let board = [];
     let counter;
+    let botFlag = false;
+    let botCell;
     const player1 = Player();
     const player2 = Player();
 
@@ -43,12 +45,13 @@ const GameBoard = (() => {
         document.querySelector('.newPlayers').addEventListener('click', function (){
             _newPlayers();
         })
+        document.querySelector('.newBotGame').addEventListener('click', function (){
+            _newBotGame();
+        })
 
         _initDivs();
 
         //set up first game and players
-        _newGame();
-        _newPlayers();
     }
 
     const _initDivs = () => {
@@ -56,6 +59,13 @@ const GameBoard = (() => {
             document.querySelectorAll('.box')[i].addEventListener('click', function (event){
                 _makeMove(event);
                 displayController.updateDisplay();
+                if (botFlag === true){
+                    _botMove();
+                    setTimeout(() => {
+                        displayController.updateDisplay();
+                    }, "1000");
+                    ;
+                }
 
             })
         }
@@ -68,9 +78,15 @@ const GameBoard = (() => {
     const _newGame = () => {
         board = new Array(' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
         counter = 0;
-        console.log(counter);
         displayController.updateDisplay();
         _clearWinMessage();
+    }
+
+    const _newBotGame = () => {
+        _newGame();
+        _newPlayerBot();
+        botFlag = true;
+        //add bot specific things to initialize
     }
 
     const _newPlayers = () => {
@@ -78,6 +94,24 @@ const GameBoard = (() => {
         player1.initName();
         document.getElementById(`p1`).textContent += ' vs ';   
         player2.initName();
+    }
+
+    const _newPlayerBot = () => {
+        _clearPlayerMessage();
+        player1.initName();
+        document.getElementById(`p1`).textContent += ' vs Bot';  
+    }
+
+    const _botMove = () => {
+        botCell = Math.floor(Math.random()*9);
+        
+        if (_checkMove(botCell)){
+            board[botCell] = 'o';
+            ++counter;
+            _winCheck();
+        }else{
+            _botMove();
+        }
     }
 
     const _clearPlayerMessage = () => {
@@ -105,7 +139,6 @@ const GameBoard = (() => {
 
     //changes board array upon user click of cell, moves to next turn
     const _makeMove = (event) => {
-        console.log(counter);
         if (_winCheck()){
             return;
         }else{
@@ -128,8 +161,10 @@ const GameBoard = (() => {
         if (_checkRow() || _checkCol() || _checkDiag()){
             if (counter%2 === 1){
                 document.getElementById('message').textContent = player1.getName() + ' wins';
-            }else{
+            }else if(counter%2 === 0){
                 document.getElementById('message').textContent = player2.getName() + ' wins';
+            }else{
+                document.getElementById('message').textContent = 'Bot wins';
             }
             return true;
         }else if (_checkOpenMoves() === 0){
@@ -191,7 +226,6 @@ const GameBoard = (() => {
 const displayController = (() => {
     'use strict';
     //update display to state of board
-    console.log(GameBoard.getBoard());
     const updateDisplay = () => {
         for (let i = 0; i < 9; i++){
             document.getElementById(`${i+1}`).textContent = GameBoard.getBoard()[i];
@@ -206,3 +240,9 @@ const displayController = (() => {
 
 //initialize array, update display
 GameBoard.init();
+
+
+
+//fix boot to wait for new game/players instead of auto loading players
+//fix message for new player, reference player 1 or 2?
+//fix win message if bot wins
